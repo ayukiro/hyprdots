@@ -80,7 +80,12 @@ preference_select() {
 
     if [[ $CHOICE != "NONE" ]]; then
         execute_command yay -Sy
-        execute_command yay -S --needed $CHOICE
+        BIN_PACKAGE="${CHOICE}-bin"
+        if pacman -Qi "$BIN_PACKAGE" &>/dev/null; then
+            execute_command yay -S --neded "$BIN_PACKAGE"
+        else
+            execute_command yay -S --needed $CHOICE
+        fi
         python -O "$HOME"/dotfiles/ags/scripts/apps.py --"$app_type" $CHOICE
     else
         echo "Not installing a(n) $type..."
@@ -110,7 +115,7 @@ install_zsh() {
     LOG="$HOME/Install-Logs/install-$(date +%d-%H%M%S)_zsh.log"
 
     for ZSH in "${zsh_pkg[@]}"; do
-        install_package "$ZSH" "$LOG"
+        sudo pacman -S --noconfirm "$ZSH" 2>&1 | tee -a "$LOG"
     done
 
     if command -v zsh >/dev/null; then

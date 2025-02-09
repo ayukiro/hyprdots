@@ -9,8 +9,10 @@ type StringOrBinding = string | Binding<any, any, string> | null;
 const empty_func = () => {};
 
 const repo_link = "https://github.com/koeqaife/hyprland-material-you";
+const repo = "https://github.com/ayukiro/hyprdots"
 const current_de = GLib.getenv("DESKTOP_SESSION");
 const author = "koeqaife";
+const coauthor = "ayukiro";
 
 const Row = (
     title: StringOrBinding,
@@ -53,9 +55,13 @@ export function Info() {
         vertical: true,
         children: [
             Row("Dotfiles", "Material You"),
-            Row("Author", author),
-            Row("Repo", repo_link, () => {
+            Row("Author of OG dots", author),
+            Row("Author of this mix", coauthor),
+            Row("OG repo", repo_link, () => {
                 Utils.execAsync(`xdg-open "${repo_link}"`).catch(print);
+            }),
+            Row("Repo of this mix", repo, () => {
+                Utils.execAsync(`xdg-open "${repo}"`).catch(print);
             }),
             Widget.Separator(),
             Row("DE", current_de!),
