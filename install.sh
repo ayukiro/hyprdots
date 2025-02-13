@@ -102,7 +102,7 @@ install_yay() {
 }
 
 install_zsh() {
-  echo "iconstalling zsh"
+  echo "installing zsh"
 
   zsh_pkg=(
     eza
