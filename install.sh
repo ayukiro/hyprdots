@@ -139,7 +139,20 @@ install_zsh() {
     cp -r "$HOME/dotfiles/setup/.zshrc" ~/
     cp -r "$HOME/dotfiles/setup/.zprofile" ~/
 
+    attempts=0
+    max_attempts=3
     while ! chsh -s $(which zsh); do
+      attempts=$((attempts + 1))
+      if [ "$attempts" -ge "$max_attempts" ]; then
+        echo "Failed to set zsh as default shell after $max_attempts attempts. Maybe you need to set it manually. Try one more time? (Y/N)"
+        read -r answer
+        if [[ "$answer" =~ ^[Yy]$ ]]; then
+          attempts=$((max_attempts - 1))
+        else
+          echo "Skipping shell change. You can set it manually using: chsh -s \$(which zsh)"
+          return 1
+        fi
+      fi
       echo "Authentication failed. Please enter the correct password."
       sleep 1
     done
