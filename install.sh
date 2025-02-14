@@ -160,6 +160,34 @@ install_zsh() {
   fi
 }
 
+install_nvim() {
+  if command -v nvim &>/dev/null; then
+    echo ":: Neovim is already installed."
+    sleep 1
+  else
+    echo ":: Installing Neovim..."
+    execute_command sudo pacman -S --noconfirm neovim
+  fi
+  echo ":: Backing up existing Neovim configurations..."
+  local DATETIME=$(date '+%Y-%m-%d_%H-%M-%S')
+  mkdir -p "$HOME/.backup/nvim/$DATETIME"
+  for dir in ~/.config/nvim ~/.local/share/nvim ~/.local/state/nvim ~/.cache/nvim; do
+    if [ -d "$dir" ]; then
+      mv "$dir" "$HOME/.backup/nvim/$DATETIME/" || {
+        echo ":: Error: Failed to backup $dir"
+        exit 1
+      }
+    fi
+  done
+  echo ":: Installing LazyVim..."
+  execute_command git clone https://github.com/LazyVim/starter ~/.config/nvim || {
+    echo ":: Error: Failed to clone LazyVim."
+    exit 1
+  }
+  execute_command rm -rf ~/.config/nvim/.git
+  echo ":: Neovim and LazyVim installation completed!"
+}
+
 install_microtex() {
   cd ~/dotfiles/setup/MicroTex/
   execute_command makepkg -si
@@ -374,7 +402,8 @@ main() {
   preference_select "file manager" "filemanager" "nautilus" "dolphin" "thunar"
   preference_select "internet browser" "browser" "brave" "firefox" "google-chrome" "zen-browser"
   preference_select "terminal emulator" "terminal" "alacritty" "kitty" "konsole"
-  ask_continue "Do you want to install and setup zsh?" && install_zsh
+  ask_continue "Do you want to install and setup zsh?" false && install_zsh
+  ask_continue "Do you want to install nvim and lazyvim?" false && install_nvim
   ask_continue "Proceed with installing MicroTex?" false && install_microtex
   ask_continue "Proceed with setting up sensors?" false && setup_sensors
   ask_continue "Proceed with checking config folders?*" && check_config_folders
