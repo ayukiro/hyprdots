@@ -81,7 +81,7 @@ preference_select() {
     execute_command yay -Sy
     BIN_PACKAGE="${CHOICE}-bin"
     if yay -Si "$BIN_PACKAGE" &>/dev/null; then
-      execute_command yay -S --nedeed "$BIN_PACKAGE"
+      execute_command yay -S --needed "$BIN_PACKAGE"
     else
       execute_command yay -S --needed $CHOICE
     fi
