@@ -80,8 +80,8 @@ preference_select() {
   if [[ $CHOICE != "NONE" ]]; then
     execute_command yay -Sy
     BIN_PACKAGE="${CHOICE}-bin"
-    if pacman -Qi "$BIN_PACKAGE" &>/dev/null; then
-      execute_command yay -S --neded "$BIN_PACKAGE"
+    if yay -Qi "$BIN_PACKAGE" &>/dev/null; then
+      execute_command yay -S --nedeed "$BIN_PACKAGE"
     else
       execute_command yay -S --needed $CHOICE
     fi
