@@ -80,7 +80,7 @@ preference_select() {
   if [[ $CHOICE != "NONE" ]]; then
     execute_command yay -Sy
     BIN_PACKAGE="${CHOICE}-bin"
-    if yay -Qi "$BIN_PACKAGE" &>/dev/null; then
+    if yay -Si "$BIN_PACKAGE" &>/dev/null; then
       execute_command yay -S --nedeed "$BIN_PACKAGE"
     else
       execute_command yay -S --needed $CHOICE
@@ -102,9 +102,9 @@ install_yay() {
 }
 
 install_zsh() {
-  echo "installing zsh"
+  echo ":: Installing zsh and dependencies..."
 
-  zsh_pkg=(
+  local zsh_pkg=(
     eza
     zsh
     zsh-completions
@@ -112,51 +112,80 @@ install_zsh() {
   )
 
   for ZSH in "${zsh_pkg[@]}"; do
-    sudo pacman -S --noconfirm "$ZSH"
+    execute_command sudo pacman -S --noconfirm "$ZSH"
   done
 
   if command -v zsh >/dev/null; then
-    if [ ! -d "$HOME/.oh-my-zsh" ]; then
-      sh -c "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended || true
+    if [ -d "$HOME/.oh-my-zsh" ]; then
+      echo ":: Backing up existing oh-my-zsh installation..."
+      mv "$HOME/.oh-my-zsh" "$HOME/.oh-my-zsh.backup-$(date +%Y%m%d-%H%M%S)"
     fi
 
+    echo ":: Installing oh-my-zsh..."
+    execute_command sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+
+    if [ ! -f "$HOME/.oh-my-zsh/oh-my-zsh.sh" ]; then
+      echo ":: Error: oh-my-zsh installation failed. Retrying with git clone..."
+      rm -rf "$HOME/.oh-my-zsh"
+      execute_command git clone https://github.com/ohmyzsh/ohmyzsh.git "$HOME/.oh-my-zsh"
+    fi
+
+    echo ":: Installing zsh plugins..."
     if [ ! -d "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions" ]; then
-      git clone https://github.com/zsh-users/zsh-autosuggestions "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions" || true
+      execute_command git clone https://github.com/zsh-users/zsh-autosuggestions "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
     fi
 
     if [ ! -d "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" ]; then
-      git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" || true
+      execute_command git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
     fi
 
-    if [ -f "$HOME/.zshrc" ]; then
-      cp -b "$HOME/.zshrc" "$HOME/.zshrc-backup" || true
-    fi
-
-    if [ -f "$HOME/.zprofile" ]; then
-      cp -b "$HOME/.zprofile" "$HOME/.zprofile-backup" || true
-    fi
-
-    cp -r "$HOME/dotfiles/setup/.zshrc" ~/
-    cp -r "$HOME/dotfiles/setup/.zprofile" ~/
-
-    attempts=0
-    max_attempts=3
-    while ! chsh -s $(which zsh); do
-      attempts=$((attempts + 1))
-      if [ "$attempts" -ge "$max_attempts" ]; then
-        echo "Failed to set zsh as default shell after $max_attempts attempts. Maybe you need to set it manually. Try one more time? (Y/N)"
-        read -r answer
-        if [[ "$answer" =~ ^[Yy]$ ]]; then
-          attempts=$((max_attempts - 1))
-        else
-          echo "Skipping shell change. You can set it manually using: chsh -s \$(which zsh)"
-          return 1
-        fi
+    for file in ".zshrc" ".zprofile"; do
+      if [ -f "$HOME/$file" ]; then
+        echo ":: Backing up existing $file..."
+        cp -b "$HOME/$file" "$HOME/$file-backup-$(date +%Y%m%d-%H%M%S)"
       fi
-      echo "Authentication failed. Please enter the correct password."
-      sleep 1
     done
-    echo "Shell changed successfully to zsh"
+
+    echo ":: Setting up zsh configuration files..."
+    cp -f "$HOME/dotfiles/setup/.zshrc" "$HOME/.zshrc"
+    cp -f "$HOME/dotfiles/setup/.zprofile" "$HOME/.zprofile"
+
+    echo ":: Setting zsh as default shell..."
+    local shell_path=$(which zsh)
+    if [ -n "$shell_path" ]; then
+      if ! grep -q "$shell_path" /etc/shells; then
+        echo ":: Adding $shell_path to /etc/shells..."
+        echo "$shell_path" | sudo tee -a /etc/shells
+      fi
+      
+      local attempts=0
+      local max_attempts=3
+      while ! chsh -s "$shell_path"; do
+        attempts=$((attempts + 1))
+        if [ "$attempts" -ge "$max_attempts" ]; then
+          echo ":: Failed to set zsh as default shell after $max_attempts attempts."
+          echo ":: You can manually set it later using: chsh -s $(which zsh)"
+          break
+        fi
+        echo ":: Authentication failed. Please try again..."
+        sleep 1
+      done
+    else
+      echo ":: Error: zsh executable not found!"
+      return 1
+    fi
+
+    echo ":: Verifying zsh installation..."
+    if [ -f "$HOME/.oh-my-zsh/oh-my-zsh.sh" ] && \
+       [ -d "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions" ] && \
+       [ -d "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" ]; then
+      echo ":: Zsh installation completed successfully!"
+    else
+      echo ":: Warning: Some components may be missing. Please verify the installation manually."
+    fi
+  else
+    echo ":: Error: zsh installation failed!"
+    return 1
   fi
 }
 
