@@ -15,7 +15,7 @@ I don’t claim full authorship — I combined elements I liked and added a few 
 ## What was changed
 
 - **Changed clock format to 12-hour clock format, added seconds (to taskbar and hyprlock)**.
-- **Added installation and configuration of zsh from Jakoolit's dotfies**.
+- **Added installation and configuration of zsh**.
 - **Added kitty configuration**.
 - **More wallpapers**.
 - And many other minor changes...
