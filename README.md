@@ -10,7 +10,7 @@ The dotfiles were inspired by Material You design. Accent colors are generated a
 This script is designed for the latest version of Arch and can be used on a freshly installed Arch system or on an already existing Hyprland setup.
 
 This project is an improved version of [these beautiful dotfiles by koeqaife](https://github.com/koeqaife/hyprland-material-you). Also I used several scripts and configs from [JaKooLit's dotfiles](https://github.com/JaKooLit/Arch-Hyprland). 
-I don’t claim full authorship — I combined elements I liked and added a few personal touches.
+I don’t claim full authorship - I combined elements I liked and added a few personal touches.
 
 ## What was changed
 
