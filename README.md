@@ -1,7 +1,7 @@
 # Hyprland dotfiles installer for Arch
 
 [![Screenshot](screenshots/screen.png "Screenshot")](screenshots/screen.png)
-
+[![Screenshot](screenshots/lockscreen.jpg "Screenshot")](screenshots/lockscreen.jpg)
 ## About these dots
 The dotfiles were inspired by Material You design. Accent colors are generated automatically when you change wallpaper, but there is an option to enter HEX value manually
 
