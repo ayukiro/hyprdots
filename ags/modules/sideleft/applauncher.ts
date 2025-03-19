@@ -3,8 +3,88 @@
 const applications_service = await Service.import("applications");
 import Box from "types/widgets/box";
 import Gtk from "gi://Gtk?version=3.0";
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
 import { Application } from "types/service/applications";
 import { WINDOW_NAME, shown } from "modules/sideleft/main";
+
+function setupFileWatcher(callback: () => void) {
+    let lastReloadTime = 0;
+    const RELOAD_THRESHOLD = 2000;
+    
+    const directories = [
+        '/usr/share/applications',
+        `${GLib.get_home_dir()}/.local/share/applications`
+    ];
+    
+    const packageDirs = [
+        '/var/lib/pacman/local',
+    ];
+    
+    const shouldReload = () => {
+        const now = Date.now();
+        if (now - lastReloadTime > RELOAD_THRESHOLD) {
+            lastReloadTime = now;
+            return true;
+        }
+        return false;
+    };
+
+    directories.forEach(dirPath => {
+        try {
+            const dir = Gio.File.new_for_path(dirPath);
+            if (!dir.query_exists(null)) {
+                return;
+            }
+            
+            const monitor = dir.monitor_directory(
+                Gio.FileMonitorFlags.WATCH_MOVES, 
+                null
+            );
+            
+            monitor.connect('changed', (_, file, otherFile, eventType) => {
+                if (file && file.get_basename().endsWith('.desktop')) {
+                    if (shouldReload()) {
+                        Utils.timeout(300, () => {
+                            callback();
+                            return false;
+                        });
+                    }
+                }
+            });
+        } catch (error) {
+        }
+    });
+    
+    packageDirs.forEach(dirPath => {
+        try {
+            const dir = Gio.File.new_for_path(dirPath);
+            if (!dir.query_exists(null)) {
+                return;
+            }
+            
+            const monitor = dir.monitor_directory(
+                Gio.FileMonitorFlags.WATCH_MOVES, 
+                null
+            );
+            
+            monitor.connect('changed', (_, file, otherFile, eventType) => {
+                if (shouldReload()) {
+                    Utils.timeout(1000, () => {
+                        callback();
+                        return false;
+                    });
+                }
+            });
+        } catch (error) {
+        }
+    });
+    
+    Utils.interval(30000, () => {
+        callback();
+        return true;
+    });
+}
 
 const AppItem = (repopulate: () => void) => (app: Application) => {
     let clickCount = 0;
@@ -37,11 +117,9 @@ const AppItem = (repopulate: () => void) => (app: Application) => {
             }
         }
     });
-
     button.connect("focus-out-event", () => {
         clickCount = 0;
     });
-
     return Widget.Box({
         attribute: { app },
         orientation: Gtk.Orientation.VERTICAL,
@@ -57,16 +135,13 @@ const AppItem = (repopulate: () => void) => (app: Application) => {
 
 export const Applauncher = () => {
     let applications: Box<any, any>[];
-
     const list = Widget.Box({
         vertical: true
     });
-
     const entry = Widget.Entry({
         hexpand: true,
         class_name: "applauncher_entry",
         placeholder_text: "Search",
-
         on_accept: () => {
             const results = applications.filter((item) => item.visible);
             if (results[0]) {
@@ -74,23 +149,26 @@ export const Applauncher = () => {
                 results[0].attribute.app.launch();
             }
         },
-
         on_change: ({ text }) =>
             applications.forEach((item) => {
                 item.visible = item.attribute.app.match(text ?? "");
             })
     });
-
+    
     function reload() {
         applications_service.reload();
         repopulate();
     }
-
+    
     function repopulate() {
         applications = applications_service.query("").map(AppItem(repopulate));
         list.children = applications;
     }
-
+    
+    setupFileWatcher(() => {
+        reload();
+    });
+    
     const menu = Widget.Menu({
         children: [
             Widget.MenuItem({
@@ -101,9 +179,9 @@ export const Applauncher = () => {
             })
         ]
     });
-
+    
     repopulate();
-
+    
     return Widget.EventBox({
         on_secondary_click_release: (self, event) => {
             menu.popup_at_pointer(event);
@@ -127,10 +205,11 @@ export const Applauncher = () => {
                 });
                 self.hook(App, (_, windowName, visible) => {
                     if (windowName !== WINDOW_NAME) return;
-
                     if (visible) {
                         entry.text = "";
                         entry.grab_focus();
+                        
+                        reload();
                     }
                 });
             }
