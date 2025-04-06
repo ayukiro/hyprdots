@@ -157,7 +157,7 @@ install_zsh() {
         echo ":: Adding $shell_path to /etc/shells..."
         echo "$shell_path" | sudo tee -a /etc/shells
       fi
-      
+
       local attempts=0
       local max_attempts=3
       while ! chsh -s "$shell_path"; do
@@ -176,9 +176,9 @@ install_zsh() {
     fi
 
     echo ":: Verifying zsh installation..."
-    if [ -f "$HOME/.oh-my-zsh/oh-my-zsh.sh" ] && \
-       [ -d "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions" ] && \
-       [ -d "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" ]; then
+    if [ -f "$HOME/.oh-my-zsh/oh-my-zsh.sh" ] &&
+      [ -d "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions" ] &&
+      [ -d "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" ]; then
       echo ":: Zsh installation completed successfully!"
     else
       echo ":: Warning: Some components may be missing. Please verify the installation manually."
@@ -236,7 +236,7 @@ install_packages() {
     hyprutils hyprwayland-scanner xdg-dbus-proxy xdg-desktop-portal \
     xdg-desktop-portal-gtk xdg-desktop-portal-hyprland xdg-user-dirs \
     xdg-utils libxdg-basedir python-pyxdg swww gtk3 gtk4 \
-    adw-gtk3 adw-gtk-theme libdbusmenu-gtk3 python-pip python-pillow sddm \
+    adw-gtk-theme libdbusmenu-gtk3 python-pip python-pillow sddm \
     sddm-theme-corners-git nm-connection-editor network-manager-applet \
     networkmanager gnome-bluetooth-3.0 wl-gammarelay-rs bluez bluez-libs bluez-utils \
     cliphist wl-clipboard libadwaita swappy nwg-look \
