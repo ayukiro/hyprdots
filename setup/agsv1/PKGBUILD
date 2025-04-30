@@ -3,7 +3,7 @@
 # This package is only intended to be used while migrating from ags v1.8.2 to ags v2.0.0.
 # Many ags configs are quite big and it takes a while to migrate, therefore I made this package
 # to install ags v1.8.2 as "agsv1", so both versions can be installed at the same time, making it
-# possible to migrate bit by bit while still having a working v1 config around. 
+# possible to migrate bit by bit while still having a working v1 config around.
 #
 # First update the aylurs-gtk-shell package to v2, then install this one.
 #
@@ -20,21 +20,22 @@ license=('GPL-3.0-only')
 makedepends=('git' 'gobject-introspection' 'meson' 'glib2-devel' 'npm' 'typescript')
 depends=('gjs' 'glib2' 'glibc' 'gtk3' 'gtk-layer-shell' 'libpulse' 'pam')
 optdepends=('gnome-bluetooth-3.0: required for bluetooth service'
-            'greetd: required for greetd service'
-            'libdbusmenu-gtk3: required for systemtray service'
-            'libsoup3: required for the Utils.fetch feature'
-            'libnotify: required for sending notifications'
-            'networkmanager: required for network service'
-            'power-profiles-daemon: required for powerprofiles service'
-            'upower: required for battery service')
+  'greetd: required for greetd service'
+  'libdbusmenu-gtk3: required for systemtray service'
+  'libsoup3: required for the Utils.fetch feature'
+  'libnotify: required for sending notifications'
+  'networkmanager: required for network service'
+  'power-profiles-daemon: required for powerprofiles service'
+  'upower: required for battery service')
 backup=('etc/pam.d/ags')
 source=("$pkgname-$pkgver.tar.gz::https://github.com/Aylur/ags/archive/refs/tags/v${pkgver}.tar.gz"
-        "git+https://gitlab.gnome.org/GNOME/libgnome-volume-control")
+  "git+https://gitlab.gnome.org/GNOME/libgnome-volume-control")
 sha256sums=('962f99dcf202eef30e978d1daedc7cdf213e07a3b52413c1fb7b54abc7bd08e6'
-            SKIP)
+  SKIP)
 
 prepare() {
   cd "$srcdir/$_pkgname-$pkgver"
+  rm -rf subprojects/gvc
   mv -T "$srcdir"/libgnome-volume-control subprojects/gvc
 }
 
