@@ -1,5 +1,11 @@
 # Hyprland dotfiles installer for Arch
 
+# ⚠️ Current Status
+
+**This dotfiles setup is currently *not* working out of the box.**  
+One of the core components (ags, which handles all the GUI panels like notifications and waybar replacement) no longer builds on newer systems. The original author of the upstream dotfiles (which this repo is heavily based on) has announced a complete rewrite of ags in a different language. However, until that happens, no updates or fixes are expected. As for this repository, there are no guarantees it will be updated to support the new ags version once it's released.
+
+
 [![Screenshot](screenshots/screen.png "Screenshot")](screenshots/screen.png)
 [![Screenshot](screenshots/lockscreen.jpg "Screenshot")](screenshots/lockscreen.jpg)
 ## About these dots
