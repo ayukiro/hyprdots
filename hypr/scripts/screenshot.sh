@@ -12,4 +12,5 @@ else
   hyprshot -m region -o "/tmp" -f "$NAME" -s --
 fi
 
+sleep 0.5
 swappy -f "/tmp/$NAME" -o "$DIR$NAME"
