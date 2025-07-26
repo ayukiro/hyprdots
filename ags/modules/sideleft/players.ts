@@ -31,15 +31,15 @@ function Player(player: MprisPlayer) {
         )
     });
 
+
     const title = Widget.Label({
         class_name: "title",
-        wrap: true,
-        wrap_mode: Pango10.WrapMode.WORD_CHAR,
+        wrap: false,
+        ellipsize: Pango10.EllipsizeMode.END,
         xalign: 0,
         label: player.bind("track_title"),
         use_markup: false
     });
-
     const artist = Widget.Label({
         class_name: "artist",
         wrap: true,
@@ -169,3 +169,4 @@ export function Media() {
         children: players.as((p) => p.map(Player))
     });
 }
+
