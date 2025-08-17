@@ -42,8 +42,8 @@ function Player(player: MprisPlayer) {
     });
     const artist = Widget.Label({
         class_name: "artist",
-        wrap: true,
-        wrap_mode: Pango10.WrapMode.WORD_CHAR,
+        wrap: false,
+        ellipsize: Pango10.EllipsizeMode.END,
         xalign: 0,
         use_markup: false,
         label: player.bind("track_artists").transform((a) => a.join(", "))
